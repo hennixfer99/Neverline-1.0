@@ -317,6 +317,8 @@ async function fuckEveline(code, login, password) {
 
                 let newAnswer = answer.replace(/[‘’]/g, "'");
 
+                console.log("newAnswer:", newAnswer);
+
                 await page.waitForTimeout(300);
 
                 await page.reload();
