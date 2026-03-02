@@ -45,15 +45,39 @@ async function fuckEveline(code, login, password) {
 
         const NEXT_SELECTOR2 =
             "xpath=/html/body/div[1]/div[4]/div/div[3]/button";
-
         const NEXT_SELECTOR3 = "#footerNavBtnNext";
         const NEXT_UNIT = "xpath=/html/body/div/main/div/div/a[1]";
+
         async function clickIfVisible(selector1, timeout = 2000) {
             const selectors = [
                 selector1,
                 NEXT_SELECTOR2,
                 NEXT_SELECTOR3,
-                NEXT_UNIT
+                NEXT_UNIT,
+            ].filter(Boolean);
+
+            for (const selector of selectors) {
+                try {
+                    const el = page.locator(selector).first();
+
+                    if (await el.isVisible({ timeout })) {
+                        await el.click();
+                        await page.waitForTimeout(300);
+                        return true;
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+
+            return false;
+        }
+        async function checkIfVisible(timeout = 2000) {
+            const selectors = [
+                "xpath=/html/body/div/main/form/div[2]/div/div[2]/div[2]/button",
+                "xpath=/html/body/div/main/form/div[2]/div/div[2]/div[3]/button",
+                "xpath=/html/body/div/main/form/div[2]/div/div/div[3]/button",
+                "xpath=/html/body/div/main/form/div[2]/div/div/div[2]/button",
             ].filter(Boolean);
 
             for (const selector of selectors) {
@@ -77,12 +101,13 @@ async function fuckEveline(code, login, password) {
             // jogo da memória
             try {
                 if (
-                    (await page
-                        .textContent(
-                            "xpath=/html/body/div/main/form/div[1]/div[1]/h1",
-                        )
-                        .catch(() => ""))
-                        .includes("Vocabulary Game")
+                    (
+                        await page
+                            .textContent(
+                                "xpath=/html/body/div/main/form/div[1]/div[1]/h1",
+                            )
+                            .catch(() => "")
+                    ).includes("Vocabulary Game")
                 ) {
                     let match = new Map();
                     let foundMatch = false;
@@ -323,16 +348,44 @@ async function fuckEveline(code, login, password) {
             }
             //3.1 check's
             try {
+                const instructions =
+                    (await page.locator(".instructions").textContent()) || "";
                 while (
-                    (
-                        (await page
-                            .textContent(
-                                "xpath=/html/body/div/main/form/div[1]/div[1]/h1",
-                            )
-                            .catch(() => "")) || ""
-                    ).includes("Check Your Understanding")
+                    instructions.includes("Choose the sentences") ||
+                    instructions.includes("Select True or False.")
                 ) {
                     for (let i = 1; i < 10; i++) {
+                        if (
+                            await page
+                                .locator(
+                                    `xpath=/html/body/div[1]/main/form/div[2]/div/div[2]/div[1]/label[${i}]`,
+                                )
+                                .isVisible({ timeout: 800 })
+                        ) {
+                            await page
+                                .locator(
+                                    `xpath=/html/body/div[1]/main/form/div[2]/div/div[2]/div[1]/label[${i}]`,
+                                )
+                                .isVisible({ timeout: 800 })
+                                .then(async (visible) => {
+                                    if (visible) {
+                                        const verify = page.locator(
+                                            `xpath=/html/body/div[1]/main/form/div[2]/div/div[2]/div[1]/input[${i}]`,
+                                        );
+
+                                        const isCorrect =
+                                            (await verify.getAttribute(
+                                                "data-iscorrect",
+                                            )) === "True";
+                                        if (isCorrect) {
+                                            await page.click(
+                                                `xpath=/html/body/div[1]/main/form/div[2]/div/div[2]/div[1]/label[${i}]`,
+                                            );
+                                        }
+                                    }
+                                });
+                        }
+                        console.log(i);
                         if (
                             await page
                                 .locator(
@@ -360,36 +413,25 @@ async function fuckEveline(code, login, password) {
                                                 `xpath=/html/body/div/main/form/div[2]/div/div/div[2]/label[${i}]`,
                                             );
                                         }
-                                    } else {
-                                        await page.click(
-                                            "xpath=/html/body/div/main/form/div[2]/div/div/div[3]/button",
-                                        );
-
-                                        await clickIfVisible(
-                                            NEXT_SELECTOR,
-                                            1200,
-                                        );
-                                        return true;
                                     }
                                 });
                         }
-
                         if (
                             await page
                                 .locator(
-                                    `xpath=/html/body/div/main/form/div[2]/div/div[2]/div[1]/label[${i}]`,
+                                    `xpath=/html/body/div/main/form/div[2]/div/div/div[1]/label[${i}]`,
                                 )
                                 .isVisible({ timeout: 800 })
                         ) {
                             await page
                                 .locator(
-                                    `xpath=/html/body/div/main/form/div[2]/div/div[2]/div[1]/label[${i}]`,
+                                    `xpath=/html/body/div/main/form/div[2]/div/div/div[1]/label[${i}]`,
                                 )
                                 .isVisible({ timeout: 800 })
                                 .then(async (visible) => {
                                     if (visible) {
                                         const verify = page.locator(
-                                            `xpath=/html/body/div/main/form/div[2]/div/div[2]/div[1]/input[${i}]`,
+                                            `xpath=/html/body/div/main/form/div[2]/div/div/div[1]/input[${i}]`,
                                         );
 
                                         const isCorrect =
@@ -398,21 +440,22 @@ async function fuckEveline(code, login, password) {
                                             )) === "True";
                                         if (isCorrect) {
                                             await page.click(
-                                                `xpath=/html/body/div/main/form/div[2]/div/div[2]/div[1]/label[${i}]`,
+                                                `xpath=/html/body/div/main/form/div[2]/div/div/div[1]/label[${i}]`,
                                             );
                                         }
-                                    } else {
-                                        await page.click(
-                                            "xpath=/html/body/div/main/form/div[2]/div/div/div[3]/button",
-                                        );
-
-                                        await clickIfVisible(
-                                            NEXT_SELECTOR,
-                                            1200,
-                                        );
-                                        return true;
                                     }
                                 });
+
+                            await page
+                                .locator(
+                                    `xpath=/html/body/div/main/form/div[2]/div/div/div[1]/label[${i}]`,
+                                )
+                                .isVisible({ timeout: 800 });
+                        }
+                        if (i == 9) {
+                            await page.click("#btnCheck");
+                            await clickIfVisible(NEXT_SELECTOR, 1200);
+                            return true;
                         }
                     }
                 }
@@ -605,5 +648,6 @@ async function fuckEveline(code, login, password) {
     }
 }
 
-fuckEveline("nenhum", "Seu email", "Sua senha");
+// fuckEveline("nenhum", "Seu email", "Sua senha");
+
 module.exports = { fuckEveline };
