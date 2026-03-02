@@ -333,7 +333,7 @@ async function fuckEveline(code, login, password) {
                     .locator(
                         "xpath=/html/body/div[1]/main/form/div[2]/div/div[2]/div/div[3]/input",
                     )
-                    .fill(newAnswer, { delay: 50 + Math.random() * 100 });
+                    .fill(newAnswer.trim(), { delay: 50 + Math.random() * 100 });
 
                 await page.waitForTimeout(300);
 
@@ -352,7 +352,8 @@ async function fuckEveline(code, login, password) {
                     (await page.locator(".instructions").textContent()) || "";
                 while (
                     instructions.includes("Choose the sentences") ||
-                    instructions.includes("Select True or False.")
+                    instructions.includes("Select True or False.") ||
+                    instructions.includes("Choose all")
                 ) {
                     for (let i = 1; i < 10; i++) {
                         if (
