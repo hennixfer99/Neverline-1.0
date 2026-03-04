@@ -92,3 +92,7 @@ Por padrão, o servidor roda na porta `3001` (ou na porta definida em `PORT`).
 ## OBSERVAÇÃO
 
 - Atente-se em não mudar o headless no código pois caso ocorra, você não conseguirá saber se está travado. no futuro esse código irá rodar em um VPS então não se preocupe, é temporário.
+
+## OBSERVAÇÃO 2
+
+- Atenção alunos do 4 ciclo, existe 1 exercicio em cada subunidade que geralmente não é feito, por enquanto é algo em que estou trabalhando, favor atenção a isso.
