@@ -66,7 +66,7 @@ async function fuckEveline(code, login, password) {
                             .catch(() => "")) || ""
                     ).includes("Write it!")
                 ) {
-                    await page.locator("#textWritingArea").fill(".");
+                    await page.locator("#textWritingArea").fill(". . . . . . . . . . .");
                     await page.click("#doneButton");
                 }
             } catch {}
