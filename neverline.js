@@ -90,7 +90,7 @@ async function fuckEveline(code, login, password) {
         }
 
         async function runFallbacks() {
-            // jogo da memória
+            //jogo da memória
             try {
                 if (
                     (
@@ -99,7 +99,14 @@ async function fuckEveline(code, login, password) {
                                 "xpath=/html/body/div/main/form/div[1]/div[1]/h1",
                             )
                             .catch(() => "")
-                    ).includes("Vocabulary Game")
+                    ).includes("Vocabulary Game") ||
+                    (
+                        await page
+                            .textContent(
+                                "xpath=/html/body/div/main/form/div[1]/div[1]/h1",
+                            )
+                            .catch(() => "")
+                    ).includes("Concentration")
                 ) {
                     let match = new Map();
                     let foundMatch = false;
@@ -178,7 +185,7 @@ async function fuckEveline(code, login, password) {
             } catch (err) {
                 console.error("memory game fallback falhou:", err.message);
             }
-            // 1️⃣ tentar clicar em um card
+            //tentar clicar em um card
             try {
                 const instructions =
                     (await page.locator(".instructions").textContent()) || "";
@@ -209,8 +216,29 @@ async function fuckEveline(code, login, password) {
             } catch (err) {
                 console.error("card fallback falhou:", err.message);
             }
+            //tentar clicar em learn new words
+            try {
+                if (
+                    (
+                        await page
+                            .textContent(
+                                "xpath=/html/body/div/main/form/div[1]/div[1]/h1",
+                            )
+                            .catch(() => "")
+                    ).includes("Learn New Words")
+                ) {
+                    await page.click(
+                        "xpath=/html/body/div/main/form/div[3]/div/div/button[1]",
+                    );
+                    await page.waitForTimeout(300);
 
-            //3.1 check's
+                    await page.click("#footerNavBtnNext");
+                    return true;
+                }
+            } catch (err) {
+                console.error("learn new words falhou:", err.message);
+            }
+            //check's
             try {
                 const instructions =
                     (await page.locator(".instructions").textContent()) || "";
@@ -328,24 +356,42 @@ async function fuckEveline(code, login, password) {
             } catch (err) {
                 console.error("Erro na verificação de checks", err.message);
             }
-            // 3️⃣ clicar em listen + escrever "." + next
+            //clicar em listen + escrever "." + next
             try {
+                let titulo = await page.textContent(
+                    "xpath=/html/body/div/main/form/div[1]/div[1]/h1",
+                );
                 if (
-                    (
-                        (await page
-                            .textContent(
-                                "xpath=/html/body/div/main/form/div[1]/div[1]/h1",
-                            )
-                            .catch(() => "")) || ""
-                    ).includes("Dictation")
+                    titulo.includes("Dictation") ||
+                    titulo.includes("Spell it")
                 ) {
-                    await page.click(
-                        "xpath=/html/body/div/main/form/div[2]/div/div[2]/div/div[1]/div/div/div/button[1]",
-                        {
-                            timeout: 800,
-                        },
-                    );
-                    await page.waitForTimeout(300);
+                    if (
+                        await page
+                            .locator(
+                                "xpath=/html/body/div/main/form/div[2]/div/div[2]/div/div[1]/div/div/div/button[1]",
+                                {
+                                    timeout: 800,
+                                },
+                            )
+                            .isVisible()
+                            .catch(() => false)
+                    ) {
+                        await page.click(
+                            "xpath=/html/body/div/main/form/div[2]/div/div[2]/div/div[1]/div/div/div/button[1]",
+                            {
+                                timeout: 800,
+                            },
+                        );
+                        await page.waitForTimeout(300);
+                    } else {
+                        await page.click(
+                            "xpath=/html/body/div/main/form/div[2]/div/div[2]/div/div[1]/div/div/button[1]",
+                            {
+                                timeout: 800,
+                            },
+                        );
+                        await page.waitForTimeout(300);
+                    }
 
                     await page
                         .locator(
@@ -363,11 +409,20 @@ async function fuckEveline(code, login, password) {
                     await page.click(
                         "xpath=/html/body/div/main/form/div[2]/div/div[2]/div/button",
                     );
-                    await page.waitForTimeout(300);
+                    await page.waitForTimeout(2000);
 
                     const answer = await page.textContent(
                         "xpath=/html/body/div/div[3]/div",
                     );
+
+                    // if(answer.includes("The correct")){
+                    //     await page.waitForTimeout(300);
+                    //     answer = await page.textContent(
+                    //         "xpath=/html/body/div/div[3]/div",
+                    //     );
+
+                    //     console.log("outra answer", answer);
+                    // }
 
                     let newAnswer = answer.replace(/[‘’]/g, "'");
 
@@ -375,17 +430,39 @@ async function fuckEveline(code, login, password) {
                         newAnswer = newAnswer.replace(/earth/gi, "Earth");
                     }
 
-                    await page.waitForTimeout(300);
+                    console.log(newAnswer);
+
+                    await page.waitForTimeout(1000);
 
                     await page.reload();
 
-                    await page.click(
-                        "xpath=/html/body/div/main/form/div[2]/div/div[2]/div/div[1]/div/div/div/button[1]",
-                        {
-                            timeout: 800,
-                        },
-                    );
-                    await page.waitForTimeout(300);
+                    if (
+                        await page
+                            .locator(
+                                "xpath=/html/body/div/main/form/div[2]/div/div[2]/div/div[1]/div/div/div/button[1]",
+                                {
+                                    timeout: 800,
+                                },
+                            )
+                            .isVisible()
+                            .catch(() => false)
+                    ) {
+                        await page.click(
+                            "xpath=/html/body/div/main/form/div[2]/div/div[2]/div/div[1]/div/div/div/button[1]",
+                            {
+                                timeout: 800,
+                            },
+                        );
+                        await page.waitForTimeout(300);
+                    } else {
+                        await page.click(
+                            "xpath=/html/body/div/main/form/div[2]/div/div[2]/div/div[1]/div/div/button[1]",
+                            {
+                                timeout: 800,
+                            },
+                        );
+                        await page.waitForTimeout(300);
+                    }
 
                     await page
                         .locator(
@@ -407,7 +484,7 @@ async function fuckEveline(code, login, password) {
             } catch (err) {
                 console.error("listen fallback falhou:", err.message);
             }
-            //4 check final unit
+            //check final unit
             try {
                 if (
                     (
@@ -446,8 +523,7 @@ async function fuckEveline(code, login, password) {
                 console.error("final unit fallback falhou:", err.message);
             }
 
-            //4.1 check final unit 2
-            //4 check final unit
+            //check final unit
             try {
                 if (
                     (
@@ -483,7 +559,7 @@ async function fuckEveline(code, login, password) {
             } catch (err) {
                 console.error("final unit fallback falhou:", err.message);
             }
-            //5 cards de conteúdo
+            //cards de conteúdo
             try {
                 while (
                     (await page.textContent(
@@ -550,7 +626,41 @@ async function fuckEveline(code, login, password) {
             } catch (err) {
                 console.error("content cards fallback falhou:", err.message);
             }
-            // 2️⃣ tentar clicar em uma option1
+            //option 4 ciclo
+            try {
+                let instructions = await page
+                    .textContent(".instructions")
+                    .catch(() => "");
+                while (
+                    instructions.toLowerCase().includes("word that matches")
+                ) {
+                    await page.click(
+                        "xpath=/html/body/div/main/form/div[2]/div/div[2]/div[1]/label[1]",
+                    );
+
+                    await page.click("#btnCheck");
+                    await page.waitForTimeout(400);
+
+                    if (
+                        (
+                            await page.textContent(
+                                "xpath=/html/body/div/div[3]/div",
+                            )
+                        )
+                            .toLowerCase()
+                            .includes("incorrect")
+                    ) {
+                        await page.reload();
+                        await page.waitForTimeout(400);
+                    } else {
+                        await clickIfVisible(NEXT_SELECTOR, 1200);
+                        return true;
+                    }
+                }
+            } catch (err) {
+                console.error("option2 fallback falhou:", err.message);
+            }
+            //tentar clicar em uma option1
             try {
                 let instructions = await page
                     .textContent(".instructions")
@@ -568,7 +678,10 @@ async function fuckEveline(code, login, password) {
                         .includes("answer the questions") ||
                     instructions.toLowerCase().includes("select the answer") ||
                     instructions.toLowerCase().includes("complete the") ||
-                    instructions.toLowerCase().includes("select the verb")
+                    instructions.toLowerCase().includes("select the verb") ||
+                    instructions
+                        .toLowerCase()
+                        .includes("click the correct answer")
                 ) {
                     for (let i = 0; i < 10; i++) {
                         if (
@@ -671,7 +784,6 @@ async function fuckEveline(code, login, password) {
 
             await card.first().waitFor({ state: "visible" });
             await card.first().locator("ul a").first().click();
-
             await page.click(
                 "xpath=/html/body/div[3]/div[2]/div[1]/table/tbody/tr[1]/td[2]/a",
             );
@@ -721,6 +833,21 @@ async function fuckEveline(code, login, password) {
 
         await card.first().waitFor({ state: "visible" });
         await card.first().locator("ul a").first().click();
+
+        try {
+            await page.click(
+                "xpath=/html/body/div[3]/div[2]/div[1]/table/tbody/tr[1]/td[2]/a",
+            );
+            await page.waitForTimeout(1000);
+            await page.click(
+                "xpath=/html/body/div[3]/div[2]/div[1]/table/tbody/tr[1]/td[2]/a",
+            );
+            await page.waitForTimeout(1000);
+            await page.click(
+                "xpath=/html/body/div[3]/div[2]/div[1]/table/tbody/tr[2]/td[2]/a",
+            );
+            await page.waitForTimeout(1000);
+        } catch (err) {}
 
         const MAX_STALL = 30;
         let stall = 0;
