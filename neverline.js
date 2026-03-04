@@ -60,32 +60,24 @@ async function fuckEveline(code, login, password) {
                 try {
                     const el = page.locator(selector).first();
 
-                    if (await el.isVisible({ timeout })) {
-                        await el.click();
-                        await page.waitForTimeout(300);
-                        return true;
-                    }
-                } catch (err) {
-                    console.error(err);
-                }
-            }
+                    if (await el.isVisible({ timeout }).catch(() => false)) {
+                        const enabled = await el.isEnabled().catch(() => true);
+                        if (!enabled) continue;
 
-            return false;
-        }
-        async function checkIfVisible(timeout = 2000) {
-            const selectors = [
-                "xpath=/html/body/div/main/form/div[2]/div/div[2]/div[2]/button",
-                "xpath=/html/body/div/main/form/div[2]/div/div[2]/div[3]/button",
-                "xpath=/html/body/div/main/form/div[2]/div/div/div[3]/button",
-                "xpath=/html/body/div/main/form/div[2]/div/div/div[2]/button",
-            ].filter(Boolean);
+                        try {
+                            await el.click({ timeout, force: true });
+                        } catch (err) {
+                            try {
+                                await page.evaluate((sel) => {
+                                    const node = document.querySelector(sel);
+                                    if (node) node.click();
+                                }, selector);
+                            } catch (err2) {
+                                console.error(err2);
+                                continue;
+                            }
+                        }
 
-            for (const selector of selectors) {
-                try {
-                    const el = page.locator(selector).first();
-
-                    if (await el.isVisible({ timeout })) {
-                        await el.click();
                         await page.waitForTimeout(300);
                         return true;
                     }
@@ -188,166 +180,36 @@ async function fuckEveline(code, login, password) {
             }
             // 1️⃣ tentar clicar em um card
             try {
-                const CARD_LABEL_1 =
-                    "xpath=/html/body/div/main/form/div[2]/div/div[2]/label[1]";
-                const BTNcard =
-                    "xpath=/html/body/div/main/form/div[2]/div/div[3]/button";
+                const instructions =
+                    (await page.locator(".instructions").textContent()) || "";
+                if (instructions.includes("the correct picture")) {
+                    const CARD_LABEL_1 =
+                        "xpath=/html/body/div/main/form/div[2]/div/div[2]/label[1]";
+                    const BTNcard =
+                        "xpath=/html/body/div/main/form/div[2]/div/div[3]/button";
 
-                await page.click(CARD_LABEL_1, { timeout: 800 });
-                await page.waitForTimeout(300);
-                await page.click(BTNcard, { timeout: 1200 });
-                await page.waitForTimeout(400);
-
-                const btn = page.locator(BTNcard).first();
-
-                while (await btn.isVisible().catch(() => false)) {
-                    await page.reload({ waitUntil: "domcontentloaded" });
-                    await page.waitForTimeout(400);
                     await page.click(CARD_LABEL_1, { timeout: 800 });
                     await page.waitForTimeout(300);
                     await page.click(BTNcard, { timeout: 1200 });
                     await page.waitForTimeout(400);
+
+                    const btn = page.locator(BTNcard).first();
+
+                    while (await btn.isVisible().catch(() => false)) {
+                        await page.reload({ waitUntil: "domcontentloaded" });
+                        await page.waitForTimeout(400);
+                        await page.click(CARD_LABEL_1, { timeout: 800 });
+                        await page.waitForTimeout(300);
+                        await page.click(BTNcard, { timeout: 1200 });
+                        await page.waitForTimeout(400);
+                    }
+                    await clickIfVisible(NEXT_SELECTOR, 1200);
+                    return true;
                 }
-                await clickIfVisible(NEXT_SELECTOR, 1200);
-                return true;
             } catch (err) {
                 console.error("card fallback falhou:", err.message);
             }
-            // 2️⃣ tentar clicar em uma option1
-            try {
-                const OPTION1_LABEL_1 =
-                    "xpath=/html/body/div/main/form/div[2]/div/div[2]/div[1]/label[1]";
-                const OPTION1_LABEL_4 =
-                    "xpath=/html/body/div/main/form/div[2]/div/div[2]/div[1]/label[4]";
-                const BTN =
-                    "xpath=/html/body/div/main/form/div[2]/div/div[2]/div[2]/button";
 
-                await page.click(OPTION1_LABEL_1, { timeout: 800 });
-                await page.waitForTimeout(300);
-                await page.click(BTN, { timeout: 1200 });
-                await page.waitForTimeout(400);
-
-                const btn = page.locator(BTN).first();
-                let attempt = 0;
-
-                while (await btn.isVisible().catch(() => false)) {
-                    await page.reload({ waitUntil: "domcontentloaded" });
-                    await page.waitForTimeout(400);
-
-                    attempt++;
-                    const useLabel4 = attempt % 4 === 0;
-                    const labelSelector = useLabel4
-                        ? OPTION1_LABEL_4
-                        : OPTION1_LABEL_1;
-
-                    await page.click(labelSelector, {
-                        timeout: useLabel4 ? 300 : 800,
-                    });
-                    await page.waitForTimeout(300);
-                    await page.click(BTN, { timeout: 1200 });
-                    await page.waitForTimeout(400);
-                }
-
-                await clickIfVisible(NEXT_SELECTOR, 1200);
-                return true;
-            } catch (err) {
-                console.error("option1 fallback falhou:", err.message);
-            }
-            // 2️⃣ tentar clicar em uma option/²
-            try {
-                await page.click(
-                    "xpath=/html/body/div/main/form/div[2]/div/div[2]/div[2]/label[1]",
-                    { timeout: 800 },
-                );
-                await page.waitForTimeout(400);
-                const BTN =
-                    "xpath=/html/body/div/main/form/div[2]/div/div[2]/div[3]/button";
-
-                await page.click(BTN);
-                await page.waitForTimeout(400);
-
-                if (await page.locator(BTN).isVisible()) {
-                    while (await page.locator(BTN).isVisible()) {
-                        await page.reload();
-                        await page.waitForTimeout(400);
-                        await page.click(
-                            "xpath=/html/body/div/main/form/div[2]/div/div[2]/div[2]/label[1]",
-                        );
-                        await page.waitForTimeout(400);
-                        await page.click(BTN);
-                        await page.waitForTimeout(400);
-                    }
-                }
-                await clickIfVisible(NEXT_SELECTOR, 1200);
-                return true;
-            } catch (err) {
-                console.error("option2 fallback falhou:", err.message);
-            }
-            // 3️⃣ clicar em listen + escrever "." + next
-            try {
-                await page.click(
-                    "xpath=/html/body/div/main/form/div[2]/div/div[2]/div/div[1]/div/div/div/button[1]",
-                    {
-                        timeout: 800,
-                    },
-                );
-                await page.waitForTimeout(300);
-
-                await page
-                    .locator(
-                        "xpath=/html/body/div[1]/main/form/div[2]/div/div[2]/div/div[3]/input",
-                    )
-                    .fill(".", { delay: 50 + Math.random() * 100 });
-
-                await page.waitForTimeout(300);
-
-                await page.click(
-                    "xpath=/html/body/div/main/form/div[2]/div/div[2]/div/button",
-                );
-                await page.waitForTimeout(300);
-
-                await page.click(
-                    "xpath=/html/body/div/main/form/div[2]/div/div[2]/div/button",
-                );
-                await page.waitForTimeout(300);
-
-                const answer = await page.textContent(
-                    "xpath=/html/body/div/div[3]/div",
-                );
-
-                let newAnswer = answer.replace(/[‘’]/g, "'");
-
-                console.log("newAnswer:", newAnswer);
-
-                await page.waitForTimeout(300);
-
-                await page.reload();
-
-                await page.click(
-                    "xpath=/html/body/div/main/form/div[2]/div/div[2]/div/div[1]/div/div/div/button[1]",
-                    {
-                        timeout: 800,
-                    },
-                );
-                await page.waitForTimeout(300);
-
-                await page
-                    .locator(
-                        "xpath=/html/body/div[1]/main/form/div[2]/div/div[2]/div/div[3]/input",
-                    )
-                    .fill(newAnswer.trim(), { delay: 50 + Math.random() * 100 });
-
-                await page.waitForTimeout(300);
-
-                await page.click(
-                    "xpath=/html/body/div/main/form/div[2]/div/div[2]/div/button",
-                );
-
-                await clickIfVisible(NEXT_SELECTOR, 1200);
-                return true;
-            } catch (err) {
-                console.error("listen fallback falhou:", err.message);
-            }
             //3.1 check's
             try {
                 const instructions =
@@ -355,7 +217,9 @@ async function fuckEveline(code, login, password) {
                 while (
                     instructions.includes("Choose the sentences") ||
                     instructions.includes("Select True or False.") ||
-                    instructions.includes("Choose all")
+                    instructions.includes("Choose all") ||
+                    instructions.includes("Select all") ||
+                    instructions.includes("Choose the correct")
                 ) {
                     for (let i = 1; i < 10; i++) {
                         if (
@@ -388,7 +252,6 @@ async function fuckEveline(code, login, password) {
                                     }
                                 });
                         }
-                        console.log(i);
                         if (
                             await page
                                 .locator(
@@ -465,6 +328,123 @@ async function fuckEveline(code, login, password) {
             } catch (err) {
                 console.error("Erro na verificação de checks", err.message);
             }
+            // 3️⃣ clicar em listen + escrever "." + next
+            try {
+                if (
+                    (
+                        (await page
+                            .textContent(
+                                "xpath=/html/body/div/main/form/div[1]/div[1]/h1",
+                            )
+                            .catch(() => "")) || ""
+                    ).includes("Dictation")
+                ) {
+                    await page.click(
+                        "xpath=/html/body/div/main/form/div[2]/div/div[2]/div/div[1]/div/div/div/button[1]",
+                        {
+                            timeout: 800,
+                        },
+                    );
+                    await page.waitForTimeout(300);
+
+                    await page
+                        .locator(
+                            "xpath=/html/body/div[1]/main/form/div[2]/div/div[2]/div/div[3]/input",
+                        )
+                        .fill(".", { delay: 50 + Math.random() * 100 });
+
+                    await page.waitForTimeout(300);
+
+                    await page.click(
+                        "xpath=/html/body/div/main/form/div[2]/div/div[2]/div/button",
+                    );
+                    await page.waitForTimeout(300);
+
+                    await page.click(
+                        "xpath=/html/body/div/main/form/div[2]/div/div[2]/div/button",
+                    );
+                    await page.waitForTimeout(300);
+
+                    const answer = await page.textContent(
+                        "xpath=/html/body/div/div[3]/div",
+                    );
+
+                    let newAnswer = answer.replace(/[‘’]/g, "'");
+
+                    console.log("newAnswer:", newAnswer);
+
+                    await page.waitForTimeout(300);
+
+                    await page.reload();
+
+                    await page.click(
+                        "xpath=/html/body/div/main/form/div[2]/div/div[2]/div/div[1]/div/div/div/button[1]",
+                        {
+                            timeout: 800,
+                        },
+                    );
+                    await page.waitForTimeout(300);
+
+                    await page
+                        .locator(
+                            "xpath=/html/body/div[1]/main/form/div[2]/div/div[2]/div/div[3]/input",
+                        )
+                        .fill(newAnswer.trim(), {
+                            delay: 50 + Math.random() * 100,
+                        });
+
+                    await page.waitForTimeout(300);
+
+                    await page.click(
+                        "xpath=/html/body/div/main/form/div[2]/div/div[2]/div/button",
+                    );
+
+                    await clickIfVisible(NEXT_SELECTOR, 1200);
+                    return true;
+                }
+            } catch (err) {
+                console.error("listen fallback falhou:", err.message);
+            }
+            //4 check final unit
+            try {
+                if (
+                    (
+                        await page
+                            .textContent(
+                                "xpath=/html/body/div/main/form/div[1]/div[1]/h1",
+                            )
+                            .catch(() => "")
+                    ).includes("Learning Log")
+                ) {
+                    for (let i = 1; i < 10; i++) {
+                        await page
+                            .locator(
+                                `xpath=/html/body/div/main/form/div[2]/div/div/div/label[${i}]`,
+                            )
+                            .isVisible({ timeout: 800 })
+                            .then(async (visible) => {
+                                if (visible) {
+                                    await page.click(
+                                        `xpath=/html/body/div/main/form/div[2]/div/div/div/label[${i}]`,
+                                    );
+                                    await page.waitForTimeout(300);
+                                } else {
+                                    await page.click(
+                                        "xpath=/html/body/div/main/form/div[2]/div/div/div/div/button",
+                                    );
+                                    await page.waitForTimeout(300);
+                                    await page.click(
+                                        "xpath=/html/body/div/main/div/div/a[2]",
+                                    );
+                                }
+                            });
+                    }
+                }
+            } catch (err) {
+                console.error("final unit fallback falhou:", err.message);
+            }
+
+            //4.1 check final unit 2
             //4 check final unit
             try {
                 if (
@@ -472,7 +452,7 @@ async function fuckEveline(code, login, password) {
                         await page.textContent(
                             "xpath=/html/body/div/main/form/div[1]/div[1]/h1",
                         )
-                    ).includes("Learning Log")
+                    ).includes("Self-Assessment")
                 ) {
                     for (let i = 1; i < 10; i++) {
                         await page
@@ -508,16 +488,48 @@ async function fuckEveline(code, login, password) {
                         "xpath=/html/body/div[1]/main/form/div[1]/div[1]/h1",
                     )) === "Review and Self-Evaluation — Vocabulary Flashcards"
                 ) {
+                    if (
+                        await page
+                            .locator("#startButton")
+                            .isVisible({ timeout: 800 })
+                    ) {
+                        await page.click("#startButton");
+                    }
+
                     await page.click(
                         "xpath=/html/body/div[1]/main/form/div[2]/div/div/div[1]/div[1]/div[1]",
                     );
-                    await page.waitForTimeout(500);
 
-                    await page.click(
-                        "xpath=/html/body/div[1]/main/form/div[2]/div/div/div[1]/div[1]/div[2]/button[1]",
-                    );
-                    await page.waitForTimeout(500);
+                    await page.waitForTimeout(1000);
 
+                    try {
+                        await page.click("#myButton1");
+
+                        try {
+                            await page
+                                .locator("#myReviewButton")
+                                .isVisible({ timeout: 800 })
+                                .then(async (visible) => {
+                                    if (visible) {
+                                        await page.click("#myReviewButton");
+                                    }
+                                });
+                            await page.waitForTimeout(1000);
+
+                            await page.click("#footerNavBtnNext");
+                            return true;
+                        } catch (err) {}
+                    } catch (err) {
+                        await page.click(
+                            "xpath=/html/body/div[1]/main/form/div[2]/div/div/div[1]/div[1]/div[1]",
+                        );
+
+                        await page.waitForTimeout(1000);
+                        await page.click("#myButton1");
+                        await page.waitForTimeout(1000);
+                    }
+
+                    await page.waitForTimeout(1000);
                     if (
                         await page
                             .locator(
@@ -528,15 +540,111 @@ async function fuckEveline(code, login, password) {
                         await page.click(
                             "xpath=/html/body/div[1]/main/form/div[2]/div/div/div[1]/div[2]/button",
                         );
+                        await page.waitForTimeout(1000);
+                        await page.click("#footerNavBtnNext");
                         return true;
                     }
                 }
-
-                await clickIfVisible(NEXT_SELECTOR, 1200);
-                return true;
             } catch (err) {
                 console.error("content cards fallback falhou:", err.message);
             }
+            // 2️⃣ tentar clicar em uma option1
+            try {
+                let instructions = await page
+                    .textContent(".instructions")
+                    .catch(() => "");
+                console.log("Instruções:", instructions);
+                if (
+                    instructions.toLowerCase().includes("select the correct") ||
+                    instructions.toLowerCase().includes("choose the answer") ||
+                    instructions
+                        .toLowerCase()
+                        .includes("select the best way") ||
+                    instructions.toLowerCase().includes("choose the words") ||
+                    instructions
+                        .toLowerCase()
+                        .includes("answer the questions") ||
+                    instructions.toLowerCase().includes("select the answer") ||
+                    instructions.toLowerCase().includes("complete the") ||
+                    instructions.toLowerCase().includes("select the verb")
+                ) {
+                    for (let i = 0; i < 10; i++) {
+                        if (
+                            await page
+                                .locator(
+                                    `xpath=/html/body/div/main/form/div[2]/div/div[2]/div[1]/label[${i}]`,
+                                )
+                                .isVisible({ timeout: 800 })
+                        ) {
+                            await page
+                                .locator(
+                                    `xpath=/html/body/div/main/form/div[2]/div/div[2]/div[1]/label[${i}]`,
+                                )
+
+                                .isVisible({ timeout: 800 })
+                                .then(async (visible) => {
+                                    if (visible) {
+                                        const verify = page.locator(
+                                            `xpath=/html/body/div/main/form/div[2]/div/div[2]/div[1]/input[${i}]`,
+                                        );
+
+                                        const isCorrect =
+                                            (await verify.getAttribute(
+                                                "data-iscorrect",
+                                            )) === "True";
+                                        if (isCorrect) {
+                                            await page.click(
+                                                `xpath=/html/body/div/main/form/div[2]/div/div[2]/div[1]/label[${i}]`,
+                                            );
+                                        }
+                                    }
+                                });
+                        } else if (
+                            await page
+                                .locator(
+                                    `xpath=/html/body/div/main/form/div[2]/div/div[2]/div[2]/label[${i}]`,
+                                )
+                                .isVisible({ timeout: 800 })
+                        ) {
+                            await page
+                                .locator(
+                                    `xpath=/html/body/div/main/form/div[2]/div/div[2]/div[2]/label[${i}]`,
+                                )
+
+                                .isVisible({ timeout: 800 })
+                                .then(async (visible) => {
+                                    if (visible) {
+                                        const verify = page.locator(
+                                            `xpath=/html/body/div/main/form/div[2]/div/div[2]/div[2]/input[${i}]`,
+                                        );
+
+                                        const isCorrect =
+                                            (await verify.getAttribute(
+                                                "data-iscorrect",
+                                            )) === "True";
+                                        if (isCorrect) {
+                                            await page.click(
+                                                `xpath=/html/body/div/main/form/div[2]/div/div[2]/div[2]/label[${i}]`,
+                                            );
+                                        }
+                                    }
+                                });
+                        }
+                        if (i == 9) {
+                            (await page
+                                .locator("#btnCheck")
+                                .isVisible({ timeout: 800 })) &&
+                                (await page.click("#btnCheck"));
+                            await page.waitForTimeout(400);
+                            await clickIfVisible(NEXT_SELECTOR, 1200);
+                            return true;
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("option1 fallback falhou:", err.message);
+            }
+
             return false;
         }
 

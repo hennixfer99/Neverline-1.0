@@ -58,31 +58,37 @@ Se você quiser usar como API/servidor, deve iniciar o Express (`server.js`).
 
 1. Instale as dependências:
 
-   ```bash
-   npm install
-   ```
+    ```bash
+    npm install
+    ```
 
 2. Garanta o Playwright instalado:
 
-   ```bash
-   npx playwright install
-   ```
+    ```bash
+    npx playwright install
+    ```
 
 3. Inicie o servidor Express:
 
-   ```bash
-   npm start
-   ```
+    ```bash
+    npm start
+    ```
 
-   ou
+    ou
 
-   ```bash
-   node server.js
-   ```
+    ```bash
+    node server.js
+    ```
 
 4. Teste se está de pé:
-
-   - `GET /` → mensagem de servidor online
-   - `GET /health` → status de saúde
+    - `GET /` → mensagem de servidor online
+    - `GET /health` → status de saúde
 
 Por padrão, o servidor roda na porta `3001` (ou na porta definida em `PORT`).
+
+5. Rode ele de maneira local e lembre-se de verificar pois as vezes o bot irá freezar, basta reinicia-lo, caso o freeze aconteça em "Review and Self-Evaluation — Vocabulary Flashcards" basta apertar o btn next abaixo da página!!
+
+
+## OBSERVAÇÃO
+
+- Atente-se em não mudar o headless no código pois caso ocorra, você não conseguirá saber se está travado. no futuro esse código irá rodar em um VPS então não se preocupe, é temporário.
