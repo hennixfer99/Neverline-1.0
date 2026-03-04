@@ -664,6 +664,15 @@ async function fuckEveline(code, login, password) {
                         )
                             .toLowerCase()
                             .includes("incorrect")
+                            ||
+                            (
+                            await page.textContent(
+                                "xpath=/html/body/div/div[3]/div",
+                            )
+                        )
+                            .toLowerCase()
+                            .includes("correct answer above")
+
                     ) {
                         await page.reload();
                         await page.waitForTimeout(400);
