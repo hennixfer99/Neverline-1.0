@@ -56,6 +56,21 @@ async function fuckEveline(code, login, password) {
                 NEXT_UNIT,
             ].filter(Boolean);
 
+            try {
+                if (
+                    (
+                        (await page
+                            .textContent(
+                                "xpath=/html/body/div/main/form/div[1]/div[1]/h1",
+                            )
+                            .catch(() => "")) || ""
+                    ).includes("Write it!")
+                ) {
+                    await page.locator("#textWritingArea").fill(".");
+                    await page.click("#doneButton");
+                }
+            } catch {}
+
             for (const selector of selectors) {
                 try {
                     const el = page.locator(selector).first();
