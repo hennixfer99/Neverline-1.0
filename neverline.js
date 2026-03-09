@@ -512,7 +512,8 @@ async function fuckEveline(code, login, password, siCurso) {
                 );
                 if (
                     titulo.includes("Dictation") ||
-                    titulo.includes("Spell it")
+                    titulo.includes("Spell it") ||
+                    titulo.includes("Spell Key")
                 ) {
                     if (
                         await page
@@ -890,7 +891,13 @@ async function fuckEveline(code, login, password, siCurso) {
                         .includes("select the missing word or words") ||
                     instructions
                         .toLowerCase()
-                        .includes("choose the correct answer")
+                        .includes("choose the correct answer") ||
+                    instructions
+                        .toLocaleLowerCase()
+                        .includes("choose the best") ||
+                    instructions
+                        .toLocaleLowerCase()
+                        .includes("choose the missing word")
                 ) {
                     for (let i = 0; i < 10; i++) {
                         if (
