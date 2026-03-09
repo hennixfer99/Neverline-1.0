@@ -2,7 +2,7 @@ const { chromium } = require("playwright-extra");
 const stealth = require("puppeteer-extra-plugin-stealth")();
 chromium.use(stealth);
 
-async function fuckEveline(code, login, password) {
+async function fuckEveline(code, login, password, siCurso) {
     let browser;
     try {
         browser = await chromium.launch({
@@ -66,7 +66,9 @@ async function fuckEveline(code, login, password) {
                             .catch(() => "")) || ""
                     ).includes("Write it!")
                 ) {
-                    await page.locator("#textWritingArea").fill(". . . . . . . . . . .");
+                    await page
+                        .locator("#textWritingArea")
+                        .fill(". . . . . . . . . .");
                     await page.click("#doneButton");
                 }
             } catch {}
@@ -663,16 +665,14 @@ async function fuckEveline(code, login, password) {
                             )
                         )
                             .toLowerCase()
-                            .includes("incorrect")
-                            ||
-                            (
+                            .includes("incorrect") ||
+                        (
                             await page.textContent(
                                 "xpath=/html/body/div/div[3]/div",
                             )
                         )
                             .toLowerCase()
                             .includes("correct answer above")
-
                     ) {
                         await page.reload();
                         await page.waitForTimeout(400);
@@ -705,7 +705,9 @@ async function fuckEveline(code, login, password) {
                     instructions.toLowerCase().includes("select the verb") ||
                     instructions
                         .toLowerCase()
-                        .includes("click the correct answer")
+                        .includes("click the correct answer") ||
+                    instructions.toLowerCase().includes("select listen") ||
+                    instructions.toLowerCase().includes("review the verbs")
                 ) {
                     for (let i = 0; i < 10; i++) {
                         if (
@@ -764,6 +766,36 @@ async function fuckEveline(code, login, password) {
                                         if (isCorrect) {
                                             await page.click(
                                                 `xpath=/html/body/div/main/form/div[2]/div/div[2]/div[2]/label[${i}]`,
+                                            );
+                                        }
+                                    }
+                                });
+                        } else if (
+                            await page
+                                .locator(
+                                    `xpath=/html/body/div/main/form/div[2]/div/div/div[2]/label[${i}]`,
+                                )
+                                .isVisible({ timeout: 800 })
+                        ) {
+                            await page
+                                .locator(
+                                    `xpath=/html/body/div/main/form/div[2]/div/div/div[2]/label[${i}]`,
+                                )
+
+                                .isVisible({ timeout: 800 })
+                                .then(async (visible) => {
+                                    if (visible) {
+                                        const verify = page.locator(
+                                            `xpath=/html/body/div/main/form/div[2]/div/div/div[2]/input[${i}]`,
+                                        );
+
+                                        const isCorrect =
+                                            (await verify.getAttribute(
+                                                "data-iscorrect",
+                                            )) === "True";
+                                        if (isCorrect) {
+                                            await page.click(
+                                                `xpath=/html/body/div/main/form/div[2]/div/div/div[2]/label[${i}]`,
                                             );
                                         }
                                     }
@@ -853,6 +885,7 @@ async function fuckEveline(code, login, password) {
         }
         const card = page.locator("div.menuCourse").filter({
             hasText: /eveline.*cavalcante/i,
+            has: page.locator("h2", { hasText: siCurso }),
         });
 
         await card.first().waitFor({ state: "visible" });
@@ -912,6 +945,6 @@ async function fuckEveline(code, login, password) {
     }
 }
 
-// fuckEveline("nenhum", "Seu email", "Sua senha");
+// fuckEveline("nenhum", "Seu email", "Sua senha", "seu curso (ex: SI3)");
 
 module.exports = { fuckEveline };
