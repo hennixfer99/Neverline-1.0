@@ -666,27 +666,6 @@ async function fuckEveline(code, login, password, siCurso) {
                                     }
                                 });
                         }
-                        if (
-                            await page
-                                .locator(
-                                    `xpath=/html/body/div[1]/main/form/div[2]/div/div/div/label[${i}]`,
-                                )
-                                .isVisible({ timeout: 800 })
-                        ) {
-                            await page
-                                .locator(
-                                    `xpath=/html/body/div[1]/main/form/div[2]/div/div/div/label[${i}]`,
-                                )
-                                .isVisible({ timeout: 800 })
-                                .then(async (visible) => {
-                                    if (visible) {
-                                        await page.click(
-                                            `xpath=/html/body/div[1]/main/form/div[2]/div/div/div/label[${i}]`,
-                                        );
-                                        await page.waitForTimeout(300);
-                                    }
-                                });
-                        }
                         if (i == 19) {
                             await page.click("#btn-Done");
                             await page.waitForTimeout(300);
@@ -905,7 +884,13 @@ async function fuckEveline(code, login, password, siCurso) {
                         .toLowerCase()
                         .includes("click the correct answer") ||
                     instructions.toLowerCase().includes("select listen") ||
-                    instructions.toLowerCase().includes("review the verbs")
+                    instructions.toLowerCase().includes("review the verbs") ||
+                    instructions
+                        .toLowerCase()
+                        .includes("select the missing word or words") ||
+                    instructions
+                        .toLowerCase()
+                        .includes("choose the correct answer")
                 ) {
                     for (let i = 0; i < 10; i++) {
                         if (
