@@ -106,6 +106,138 @@ async function fuckEveline(code, login, password, siCurso) {
             return false;
         }
 
+        function phraseMaker(frase) {
+            const palavrasOriginais = frase
+                .replace(/[.,!?]/g, "")
+                .split(/\s+/)
+                .filter(Boolean);
+
+            const palavras = [...palavrasOriginais];
+
+            const conectores = [
+                "because",
+                "when",
+                "if",
+                "although",
+                "since",
+                "while",
+            ];
+            const auxiliares = ["is", "are", "was", "were", "am"];
+            const pronomes = ["i", "you", "he", "she", "it", "we", "they"];
+            const objetos = ["me", "you", "him", "her", "it", "us", "them"];
+            const adjetivosComuns = [
+                "bad",
+                "sad",
+                "happy",
+                "angry",
+                "upset",
+                "tired",
+                "worried",
+                "confused",
+                "nervous",
+                "afraid",
+                "sorry",
+                "good",
+                "fine",
+            ];
+            const verbosPrincipais = [
+                "feel",
+                "feels",
+                "felt",
+                "like",
+                "likes",
+                "liked",
+                "want",
+                "wants",
+                "wanted",
+                "need",
+                "needs",
+                "needed",
+                "love",
+                "loves",
+                "loved",
+                "hate",
+                "hates",
+                "hated",
+                "think",
+                "thinks",
+                "thought",
+            ];
+
+            function retirar(condicao) {
+                const index = palavras.findIndex(condicao);
+                if (index === -1) return null;
+                return palavras.splice(index, 1)[0];
+            }
+
+            function ehNomeProprio(p) {
+                return /^[A-Z][a-z]+$/.test(p);
+            }
+
+            function ehVerboIng(p) {
+                return /ing$/i.test(p);
+            }
+
+            // 1. tentar achar sujeito principal
+            let sujeito =
+                retirar((p) => ehNomeProprio(p)) ||
+                retirar((p) => pronomes.includes(p.toLowerCase())) ||
+                "";
+
+            // 2. verbo principal
+            let verboPrincipal =
+                retirar((p) => verbosPrincipais.includes(p.toLowerCase())) ||
+                "";
+
+            // 3. complemento/adjetivo
+            let complemento =
+                retirar((p) => adjetivosComuns.includes(p.toLowerCase())) || "";
+
+            // 4. conector
+            let conector =
+                retirar((p) => conectores.includes(p.toLowerCase())) || "";
+
+            // 5. sujeito secundário
+            let sujeito2 =
+                retirar((p) => pronomes.includes(p.toLowerCase())) || "";
+
+            // 6. auxiliar
+            let auxiliar =
+                retirar((p) => auxiliares.includes(p.toLowerCase())) || "";
+
+            // 7. ação com ing
+            let acao = retirar((p) => ehVerboIng(p)) || "";
+
+            // 8. objeto
+            let objeto =
+                retirar((p) => objetos.includes(p.toLowerCase())) || "";
+
+            const sobra = palavras.join(" ");
+
+            let partes = [
+                sujeito,
+                verboPrincipal,
+                complemento,
+                conector,
+                sujeito2,
+                auxiliar,
+                acao,
+                objeto,
+                sobra,
+            ].filter(Boolean);
+
+            let fraseFinal = partes.join(" ").trim();
+
+            if (fraseFinal) {
+                fraseFinal =
+                    fraseFinal.charAt(0).toUpperCase() +
+                    fraseFinal.slice(1) +
+                    ".";
+            }
+
+            return fraseFinal || frase;
+        }
+
         async function runFallbacks() {
             //jogo da memória
             try {
@@ -512,28 +644,56 @@ async function fuckEveline(code, login, password, siCurso) {
                             .catch(() => "")
                     ).includes("Learning Log")
                 ) {
-                    for (let i = 1; i < 10; i++) {
-                        await page
-                            .locator(
-                                `xpath=/html/body/div/main/form/div[2]/div/div/div/label[${i}]`,
-                            )
-                            .isVisible({ timeout: 800 })
-                            .then(async (visible) => {
-                                if (visible) {
-                                    await page.click(
-                                        `xpath=/html/body/div/main/form/div[2]/div/div/div/label[${i}]`,
-                                    );
-                                    await page.waitForTimeout(300);
-                                } else {
-                                    await page.click(
-                                        "xpath=/html/body/div/main/form/div[2]/div/div/div/div/button",
-                                    );
-                                    await page.waitForTimeout(300);
-                                    await page.click(
-                                        "xpath=/html/body/div/main/div/div/a[2]",
-                                    );
-                                }
-                            });
+                    for (let i = 1; i < 20; i++) {
+                        if (
+                            await page
+                                .locator(
+                                    `xpath=/html/body/div/main/form/div[2]/div/div/div/label[${i}]`,
+                                )
+                                .isVisible({ timeout: 800 })
+                        ) {
+                            await page
+                                .locator(
+                                    `xpath=/html/body/div/main/form/div[2]/div/div/div/label[${i}]`,
+                                )
+                                .isVisible({ timeout: 800 })
+                                .then(async (visible) => {
+                                    if (visible) {
+                                        await page.click(
+                                            `xpath=/html/body/div/main/form/div[2]/div/div/div/label[${i}]`,
+                                        );
+                                        await page.waitForTimeout(300);
+                                    }
+                                });
+                        }
+                        if (
+                            await page
+                                .locator(
+                                    `xpath=/html/body/div[1]/main/form/div[2]/div/div/div/label[${i}]`,
+                                )
+                                .isVisible({ timeout: 800 })
+                        ) {
+                            await page
+                                .locator(
+                                    `xpath=/html/body/div[1]/main/form/div[2]/div/div/div/label[${i}]`,
+                                )
+                                .isVisible({ timeout: 800 })
+                                .then(async (visible) => {
+                                    if (visible) {
+                                        await page.click(
+                                            `xpath=/html/body/div[1]/main/form/div[2]/div/div/div/label[${i}]`,
+                                        );
+                                        await page.waitForTimeout(300);
+                                    }
+                                });
+                        }
+                        if (i == 19) {
+                            await page.click("#btn-Done");
+                            await page.waitForTimeout(300);
+                            await page.click(
+                                "xpath=/html/body/div/main/div/div/a[2]",
+                            );
+                        }
                     }
                 }
             } catch (err) {
@@ -642,6 +802,44 @@ async function fuckEveline(code, login, password, siCurso) {
                 }
             } catch (err) {
                 console.error("content cards fallback falhou:", err.message);
+            }
+            //type it
+            try {
+                if (
+                    await page.locator("#btnTypeIt").isVisible({ timeout: 800 })
+                ) {
+                    await page.click("#btnTypeIt");
+                    await page.waitForTimeout(300);
+                    let answers = "";
+                    for (let i = 1; i < 25; i++) {
+                        if (
+                            await page
+                                .locator(
+                                    `xpath=/html/body/div[1]/main/form/div[2]/div/div[2]/div/div[1]/div[1]/p[${i}]`,
+                                )
+                                .isVisible({ timeout: 800 })
+                        ) {
+                            answers +=
+                                (await page
+                                    .locator(
+                                        `xpath=/html/body/div[1]/main/form/div[2]/div/div[2]/div/div[1]/div[1]/p[${i}]`,
+                                    )
+                                    .textContent()) + " ";
+                        } else {
+                            break;
+                        }
+                    }
+                    answers = answers.trim();
+
+                    await page.locator("#ko-input").fill(phraseMaker(answers));
+                    await page.waitForTimeout(300);
+                    await page.click("#btnCheck");
+                    await page.waitForTimeout(300);
+                    await clickIfVisible(NEXT_SELECTOR, 1200);
+                    return true;
+                }
+            } catch (err) {
+                console.error("type it fallback falhou:", err.message);
             }
             //option 4 ciclo
             try {
