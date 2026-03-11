@@ -2,7 +2,7 @@ const { chromium } = require("playwright-extra");
 const stealth = require("puppeteer-extra-plugin-stealth")();
 chromium.use(stealth);
 
-async function fuckEveline(code, login, password, siCurso) {
+async function neverLine(code, login, password, siCurso) {
     let browser;
     try {
         browser = await chromium.launch({
@@ -1135,6 +1135,7 @@ async function fuckEveline(code, login, password, siCurso) {
     }
 }
 
-// fuckEveline("nenhum", "Seu email", "Sua senha", "seu curso (ex: SI3)");
+// neverLine
+//("nenhum", "Seu email", "Sua senha", "seu curso (ex: SI3)");
 
-module.exports = { fuckEveline };
+module.exports = { neverLine };

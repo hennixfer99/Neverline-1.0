@@ -1,5 +1,5 @@
 const express = require("express");
-const fuckEveline = require("./neverline.js");
+const neverLine = require("./neverline.js");
 
 
 const app = express();
@@ -15,10 +15,10 @@ app.get("/health", (req, res) => {
     res.status(200).json({ ok: true });
 });
 
-app.post("/fvckevel", async (req, res) => {
+app.post("/neverline", async (req, res) => {
     const { code, login, password } = req.body;
 
-    fuckEveline.fuckEveline(code, login, password)
+    neverLine.neverLine(code, login, password)
         .then(() => {
             res.status(200).json({ message: "Acabamo patrão!" });
         })
