@@ -580,6 +580,14 @@ async function neverLine(code, login, password, siCurso) {
                         newAnswer = newAnswer.replace(/earth/gi, "Earth");
                     }
 
+                    if (
+                        newAnswer.includes("earthquake") ||
+                        newAnswer.includes("Earthquake") ||
+                        newAnswer.includes("earthquakes") ||
+                        newAnswer.includes("Earthquakes")
+                    ) {
+                        newAnswer = newAnswer.replace(/earth/gi, "earth");
+                    }
                     console.log(newAnswer);
 
                     await page.waitForTimeout(1000);
