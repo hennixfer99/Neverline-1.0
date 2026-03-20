@@ -1143,7 +1143,6 @@ async function neverLine(code, login, password, siCurso) {
     }
 }
 
-// neverLine
-//("nenhum", "Seu email", "Sua senha", "seu curso (ex: SI3)");
+// neverLine("nenhum", "Seu email", "Sua senha", "seu curso (ex: SI3)");
 
 module.exports = { neverLine };
