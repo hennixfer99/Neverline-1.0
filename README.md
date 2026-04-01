@@ -50,6 +50,8 @@ Exemplo neste projeto:
 node neverline.js
 ```
 
+###Não esqueça de entrar em neverline.js e alterar a linha de execução, é a chamada da função no fim da página.
+
 ## Rodar como servidor (Express)
 
 Se você quiser usar como API/servidor, deve iniciar o Express (`server.js`).
