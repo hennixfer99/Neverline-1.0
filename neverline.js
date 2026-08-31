@@ -36,8 +36,10 @@ async function neverLine(code, login, password, siCurso) {
             delay: 50 + Math.random() * 100,
         });
 
+        await page.waitForTimeout(300);
+
         await page.click(
-            "xpath=/html/body/div[3]/div/div[1]/div/form/div[4]/input",
+            "xpath=/html/body/div[4]/div/div[1]/div/form/div[4]/input",
         );
         await page.waitForTimeout(1000);
 
@@ -1143,6 +1145,6 @@ async function neverLine(code, login, password, siCurso) {
     }
 }
 
-// neverLine("nenhum", "Seu email", "Sua senha", "seu curso (ex: SI3)");
+neverLine("nenhum", "seu login", "sua senha", "seu curso (ex SI4, SI5)");
 
 module.exports = { neverLine };
