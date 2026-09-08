@@ -3,7 +3,7 @@ const stealth = require("puppeteer-extra-plugin-stealth")();
 chromium.use(stealth);
 
 async function neverLine(code, login, password, siCurso) {
-    let browser;
+    let browser; 
     try {
         browser = await chromium.launch({
             headless: false,
