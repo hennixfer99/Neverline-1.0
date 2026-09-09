@@ -4,7 +4,7 @@ chromium.use(stealth);
 
 async function neverLine(code, login, password, siCurso) {
     let browser; 
-    try {
+    try { 
         browser = await chromium.launch({
             headless: false,
             args: [
